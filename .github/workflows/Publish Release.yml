@@ -9,7 +9,7 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     env:
       python_ver: 3.11
 
@@ -30,7 +30,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r ./requirements.txt -t ./lib
-          zip -r Flow.Launcher.Plugin.ResolutionChanger.zip . -x '*.git*'
+      - name: Remove .git files
+        run: |
+          Remove-Item -Recurse -Force .git, .github
+      - name: Compress files
+        run: |
+          Compress-Archive -Path * -DestinationPath Flow.Launcher.Plugin.ResolutionChanger.zip -Force
       - name: Publish
         if: success()
         uses: softprops/action-gh-release@v1
