@@ -1,0 +1,12 @@
+{
+    "ID": "3ce3f35e-4915-4ffc-bdc0-eb9a2793801f",
+    "ActionKeyword": "reschange",
+    "Name": "Resolution Changer",
+    "Description": "Change screen resolution and refresh rate",
+    "Author": "Mark Cutajar",
+    "Version": "0.1",
+    "Language": "python",
+    "Website": "https://example.com",
+    "ExecuteFileName": "main.py"
+  }
+  
