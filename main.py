@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
-
-import sys,os
+import sys
+import os
+import ctypes
+from ctypes import wintypes
 parent_folder_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(parent_folder_path)
 sys.path.append(os.path.join(parent_folder_path, 'lib'))
@@ -8,8 +9,6 @@ sys.path.append(os.path.join(parent_folder_path, 'plugin'))
 
 
 from flowlauncher import FlowLauncher
-import win32api
-import win32con
 
 
 class ResolutionChanger(FlowLauncher):
@@ -44,12 +43,66 @@ class ResolutionChanger(FlowLauncher):
             }]
 
     def set_resolution(self, width, height, refresh_rate):
-        devmode = win32api.EnumDisplaySettings(None, win32con.ENUM_CURRENT_SETTINGS)
-        devmode.PelsWidth = width
-        devmode.PelsHeight = height
-        devmode.DisplayFrequency = refresh_rate
-        devmode.Fields = win32con.DM_PELSWIDTH | win32con.DM_PELSHEIGHT | win32con.DM_DISPLAYFREQUENCY
-        win32api.ChangeDisplaySettings(devmode, win32con.CDS_FULLSCREEN)
+        # Define structures
+        class DEVMODE(ctypes.Structure):
+            _fields_ = [
+                ("dmDeviceName", ctypes.c_wchar * 32),
+                ("dmSpecVersion", wintypes.WORD),
+                ("dmDriverVersion", wintypes.WORD),
+                ("dmSize", wintypes.WORD),
+                ("dmDriverExtra", wintypes.WORD),
+                ("dmFields", wintypes.DWORD),
+                ("dmOrientation", wintypes.SHORT),
+                ("dmPaperSize", wintypes.SHORT),
+                ("dmPaperLength", wintypes.SHORT),
+                ("dmPaperWidth", wintypes.SHORT),
+                ("dmScale", wintypes.SHORT),
+                ("dmCopies", wintypes.SHORT),
+                ("dmDefaultSource", wintypes.SHORT),
+                ("dmPrintQuality", wintypes.SHORT),
+                ("dmColor", wintypes.SHORT),
+                ("dmDuplex", wintypes.SHORT),
+                ("dmYResolution", wintypes.SHORT),
+                ("dmTTOption", wintypes.SHORT),
+                ("dmCollate", wintypes.SHORT),
+                ("dmFormName", ctypes.c_wchar * 32),
+                ("dmLogPixels", wintypes.WORD),
+                ("dmBitsPerPel", wintypes.DWORD),
+                ("dmPelsWidth", wintypes.DWORD),
+                ("dmPelsHeight", wintypes.DWORD),
+                ("dmDisplayFlags", wintypes.DWORD),
+                ("dmDisplayFrequency", wintypes.DWORD),
+                ("dmICMMethod", wintypes.DWORD),
+                ("dmICMIntent", wintypes.DWORD),
+                ("dmMediaType", wintypes.DWORD),
+                ("dmDitherType", wintypes.DWORD),
+                ("dmReserved1", wintypes.DWORD),
+                ("dmReserved2", wintypes.DWORD),
+                ("dmPanningWidth", wintypes.DWORD),
+                ("dmPanningHeight", wintypes.DWORD),
+            ]
+
+        ENUM_CURRENT_SETTINGS = -1
+        CDS_FULLSCREEN = 4
+        DM_PELSWIDTH = 0x80000
+        DM_PELSHEIGHT = 0x100000
+        DM_DISPLAYFREQUENCY = 0x400000
+
+        # Initialize DEVMODE
+        devmode = DEVMODE()
+        devmode.dmSize = ctypes.sizeof(DEVMODE)
+        
+        # Get current settings
+        ctypes.windll.user32.EnumDisplaySettingsW(None, ENUM_CURRENT_SETTINGS, ctypes.byref(devmode))
+        
+        # Set the new resolution and refresh rate
+        devmode.dmPelsWidth = width
+        devmode.dmPelsHeight = height
+        devmode.dmDisplayFrequency = refresh_rate
+        devmode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY
+
+        # Apply settings
+        ctypes.windll.user32.ChangeDisplaySettingsW(ctypes.byref(devmode), CDS_FULLSCREEN)
 
 
 if __name__ == "__main__":

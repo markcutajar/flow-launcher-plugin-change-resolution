@@ -7,6 +7,7 @@
     "Version": "0.1",
     "Language": "python",
     "Website": "https://example.com",
-    "ExecuteFileName": "main.py"
+    "ExecuteFileName": "main.py",
+    "IcoPath": "Images\\app.png"
   }
   
